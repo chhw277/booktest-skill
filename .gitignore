@@ -1,0 +1,6 @@
+# API keys - never commit
+config.json
+*.log
+*.aux
+*.out
+__pycache__/
