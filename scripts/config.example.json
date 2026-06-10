@@ -1,0 +1,17 @@
+{
+    "deepseek": {
+        "api_key": "sk-xxx",
+        "base_url": "https://api.deepseek.com",
+        "model": "deepseek-chat"
+    },
+    "relay": {
+        "api_key": "",
+        "base_url": "",
+        "model": ""
+    },
+    "gpt": {
+        "api_key": "",
+        "base_url": "https://api.openai.com",
+        "model": "gpt-4o"
+    }
+}
