@@ -138,26 +138,28 @@ def verify_problem(filepath, problem_num, config):
 
     return results
 
-def generate_gemini_prompt(filepath, problem_num):
-    """生成Gemini网页端验证提示词"""
-    content = extract_problem(filepath, problem_num)
-    if not content:
-        print(f'❌ 未找到题 {problem_num}')
-        return None
+def generate_gemini_prompt(problem_num=None):
+    """生成Gemini网页端验证指令（配合PDF使用）"""
+    if problem_num:
+        prompt = f"""请验证这份PDF中题 {problem_num} 的解答是否正确。
 
-    prompt = f"""请验证以下电动力学题目的解答是否正确。
-
-仔细检查：
-1. 物理概念和图像是否正确
-2. 数学推导是否有误
+检查要点：
+1. 物理概念是否正确
+2. 数学推导是否有误（符号、系数、积分等）
 3. 边界条件是否正确应用
 4. 最终结果是否正确
 
-题目 {problem_num}：
-
-{content}
-
 请给出：✅正确 / ⚠️有小问题 / ❌错误，并说明原因。"""
+    else:
+        prompt = """请验证这份PDF中的电动力学解答是否正确。
+
+检查要点：
+1. 物理概念是否正确
+2. 数学推导是否有误（符号、系数、积分等）
+3. 边界条件是否正确应用
+4. 最终结果是否正确
+
+对每道题给出：✅正确 / ⚠️有小问题 / ❌错误，并说明原因。"""
 
     return prompt
 
@@ -192,9 +194,9 @@ if __name__ == '__main__':
 
     elif '--gemini' in sys.argv:
         idx = sys.argv.index('--gemini')
-        if idx + 1 < len(sys.argv):
+        problem_num = None
+        if idx + 1 < len(sys.argv) and not sys.argv[idx + 1].startswith('--'):
             problem_num = sys.argv[idx + 1]
-            prompt = generate_gemini_prompt(filepath, problem_num)
-            if prompt:
-                print('\n📋 复制以下内容到 Gemini 网页端：\n')
-                print(prompt)
+        prompt = generate_gemini_prompt(problem_num)
+        print('\n📋 复制以下内容到 Gemini 网页端，然后上传PDF：\n')
+        print(prompt)

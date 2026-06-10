@@ -339,7 +339,12 @@ python D:/教材/通用脚本/verify.py <tex文件> --gemini 2.10    生成Gemin
 
 ### Gemini网页端验证
 
-使用 `--gemini` 选项自动生成提示词，复制到 Gemini 网页端验证。
+生成检查指令，复制到 Gemini 网页端后上传 PDF 答案文件：
+
+```
+python D:/教材/通用脚本/verify.py <tex文件> --gemini        全书检查指令
+python D:/教材/通用脚本/verify.py <tex文件> --gemini 2.10   单题检查指令
+```
 
 如果错误，请给出正确解答。
 ```
