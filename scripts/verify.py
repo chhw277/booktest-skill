@@ -165,19 +165,27 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2:
         print('用法:')
-        print('  python verify.py <tex文件> --problem 2.10    验证单题')
-        print('  python verify.py <tex文件> --all            验证全部')
-        print('  python verify.py <tex文件> --gemini 2.10    生成Gemini提示词')
+        print('  python verify.py <tex文件> --problem 2.10              验证单题')
+        print('  python verify.py <tex文件> --problem 2.10 --problem 2.11  验证多题')
+        print('  python verify.py <tex文件> --all                       验证全部')
+        print('  python verify.py <tex文件> --gemini 2.10               生成Gemini提示词')
         sys.exit(1)
 
     filepath = sys.argv[1]
     config = load_config()
 
     if '--problem' in sys.argv:
-        idx = sys.argv.index('--problem')
-        if idx + 1 < len(sys.argv):
-            problem_num = sys.argv[idx + 1]
-            verify_problem(filepath, problem_num, config)
+        # 支持多个 --problem 参数：--problem 2.10 --problem 2.11
+        problems = []
+        i = 0
+        while i < len(sys.argv):
+            if sys.argv[i] == '--problem' and i + 1 < len(sys.argv):
+                problems.append(sys.argv[i + 1])
+                i += 2
+            else:
+                i += 1
+        for p in problems:
+            verify_problem(filepath, p, config)
 
     elif '--all' in sys.argv:
         # 提取所有题号
