@@ -101,9 +101,11 @@ D:\教材\书名\
 ```
 
 **上传后自动处理**：
-- PDF → 存为 `原书.pdf`
-- 图片 → 存到 `图片\` 目录
-- docx → 转存或提取文字
+- PDF → 存为 `原书.pdf`，自动检测类型并提取题目
+- 文字型PDF → pdfplumber直接提取文字到 `OCR\`
+- 扫描型PDF → PaddleOCR提取文字 + 保存页面图片到 `图片\`，供视觉AI读取公式/电路图
+- 图片 → 存到 `图片\` 目录，视觉AI直接读取
+- docx → python-docx提取文字
 - 章节PDF → 拆分到对应位置
 
 **继续已有书籍**：
@@ -204,15 +206,51 @@ D:\教材\书名\
 - 各自完整包含三大标记
 - 不要合并为一个subsection
 
+## 题目提取
+
+支持三种文档格式，自动选择提取方式：
+
+### 文字型PDF（pdfplumber直接提取，100%准确）
+```
+python D:/教材/通用脚本/extract.py "文件.pdf" -d "D:/教材/书名" -v
+```
+
+### 扫描型PDF（自动检测 → PaddleOCR提文字 + 保存图片供视觉AI）
+```
+python D:/教材/通用脚本/extract.py "文件.pdf" -d "D:/教材/书名" -v
+```
+- 自动检测PDF类型：pdfplumber提取不到文字 → 切换扫描模式
+- PaddleOCR提取文字内容
+- 页面图片保存到 `书名/图片/` 目录，供视觉AI读取公式和电路图
+- 手动指定类型：`--type text` 或 `--type scanned`
+
+### Word文档（python-docx直接提取）
+```
+python D:/教材/通用脚本/extract.py "文件.docx" -d "D:/教材/书名" -v
+```
+
+### 图片（视觉AI直接读取）
+```
+python D:/教材/通用脚本/extract.py "图片.png" -d "D:/教材/书名" -v
+```
+
+### 提取流程
+1. 运行 `extract.py`，自动检测格式并提取
+2. 文字型PDF → 直接得到题目文字
+3. 扫描型PDF → OCR文字 + 页面图片
+4. **视觉AI辅助**：公式、电路图、示意图由我直接读图片确认
+5. 提取结果保存到 `书名/OCR/` 目录（txt文件）
+
 ## 工作流程
 
 ### 做新题
 
-1. **读题**: 用 `get_ocr.py` 定位OCR文本，或读取用户提供的PDF/图片
+1. **读题**: 用 `extract.py` 提取题目，或用 `get_ocr.py` 定位已有OCR文本
    ```
+   python D:/教材/通用脚本/extract.py "作业.pdf" -d "D:/教材/书名" -v
    python D:/教材/通用脚本/get_ocr.py D:/教材/电动力学 2.10
    ```
-   如需读图片：用 Read 工具直接读 page_XXX.png
+   扫描型PDF：用 Read 工具读 `图片/page_XXX.png` 确认公式和电路图
 
 2. **理解**: 分析题目，确定解题方法
 
@@ -348,6 +386,18 @@ python D:/教材/通用脚本/verify.py <tex文件> --gemini 2.10   单题检查
 
 如果错误，请给出正确解答。
 ```
+
+## 通用脚本
+
+存放在 `D:\教材\通用脚本\`：
+- `extract.py` — 题目提取（PDF/Word/图片，自动检测PDF类型）
+- `get_ocr.py` — 读取已有OCR题目
+- `check_format.py` — 格式检查
+- `fix_format.py` — 格式修复
+- `compile.py` — 编译+清理中间产物到build/
+- `progress.py` — 进度统计
+- `verify.py` — 交叉验证（多模型对比）
+- `config.json` — API配置
 
 ## 注意事项
 

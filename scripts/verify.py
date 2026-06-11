@@ -1,5 +1,5 @@
 """
-交叉验证脚本 — 调用多模型验证电动力学答案
+交叉验证脚本 — 调用多模型验证课后题答案
 用法: python verify.py <tex文件路径> [--problem 2.10] [--all]
 选项: --problem 验证指定题目, --all 验证全部
 """
@@ -7,9 +7,6 @@ import sys
 import os
 import json
 import re
-import io
-
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(SCRIPT_DIR, 'config.json')
@@ -36,7 +33,7 @@ def call_api(base_url, api_key, model, prompt):
                 'model': model,
                 'messages': [{'role': 'user', 'content': prompt}],
                 'temperature': 0.1,
-                'max_tokens': 2000,
+                'max_tokens': 4000,
             },
             timeout=60
         )
@@ -72,7 +69,7 @@ def extract_problem(filepath, problem_num):
 
 def build_verify_prompt(problem_num, problem_content):
     """构建验证提示词"""
-    return f"""请验证以下电动力学题目的解答是否正确。
+    return f"""请验证以下课后题的解答是否正确。
 
 仔细检查：
 1. 物理概念和图像是否正确
@@ -132,9 +129,8 @@ def verify_problem(filepath, problem_num, config):
         result = call_api(cfg['base_url'], cfg['api_key'], cfg['model'], prompt)
         results[name] = result
         print(f'\n--- {name} 结果 ---')
-        print(result[:500])
-        if len(result) > 500:
-            print('...(截断)')
+        print(result)
+
 
     return results
 
@@ -151,7 +147,7 @@ def generate_gemini_prompt(problem_num=None):
 
 请给出：✅正确 / ⚠️有小问题 / ❌错误，并说明原因。"""
     else:
-        prompt = """请验证这份PDF中的电动力学解答是否正确。
+        prompt = """请验证这份PDF中的课后题解答是否正确。
 
 检查要点：
 1. 物理概念是否正确
@@ -187,7 +183,7 @@ if __name__ == '__main__':
         # 提取所有题号
         with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
-        problems = re.findall(r'\\subsection\*\{题 (\d+\.\d+)\}', content)
+        problems = re.findall(r'\\subsection\*\{题\s+([\d.]+\(?[a-z]?\)?)\}', content)
         print(f'共找到 {len(problems)} 道题')
         for p in problems:
             verify_problem(filepath, p, config)
