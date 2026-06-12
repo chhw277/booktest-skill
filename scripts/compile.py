@@ -20,17 +20,13 @@ def compile_tex(filepath, auto_open=False):
     build_dir = os.path.join(tex_dir, 'build')
     os.makedirs(build_dir, exist_ok=True)
 
-    # pdflatex路径
-    pdflatex = r'/c/Users/chwwyer/AppData/Local/Programs/MiKTeX/miktex/bin/x64/pdflatex.exe'
-
-    if not os.path.exists(pdflatex):
-        # 尝试Windows路径
-        pdflatex_win = r'C:\Users\chwwyer\AppData\Local\Programs\MiKTeX\miktex\bin\x64\pdflatex.exe'
-        if os.path.exists(pdflatex_win):
-            pdflatex = pdflatex_win
-        else:
-            print('❌ 找不到pdflatex，请检查MiKTeX安装路径。')
-            sys.exit(1)
+    # pdflatex：优先用PATH里的，找不到再提示安装
+    pdflatex = shutil.which('pdflatex')
+    if not pdflatex:
+        print('❌ 找不到pdflatex，请确保已安装MiKTeX或TeX Live并添加到PATH。')
+        print('   MiKTeX: https://miktex.org/download')
+        print('   TeX Live: https://www.tug.org/texlive/')
+        sys.exit(1)
 
     print(f'📄 编译: {tex_name}')
 
